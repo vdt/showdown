@@ -1172,14 +1172,12 @@ var make_tag = function(tag, text) {
     if(tag_match)
     {
         index = tag_match[0].length;
-        console.log("index jumped to " + text.substring(index, index+4));
 
     }
     //*/
     
     // get first non-whitespace non-marker character
     index += text.search(/[^ \t*\-#>]/);
-    console.log("  -- checking:" + text.substring(index, index+10));
     var first_char = text.charCodeAt(index); 
     if(first_char >= 1424 && first_char <= 1983) 
     {
