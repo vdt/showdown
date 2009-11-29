@@ -1168,7 +1168,7 @@ var make_tag = function(tag, text) {
 
     //*
     // Skip the tag
-    var tag_match = text.match(/<[^<>]+>/);
+    var tag_match = text.match(/^\s*<[^<>]+>/);
     if(tag_match)
     {
         index = tag_match[0].length;
