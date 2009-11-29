@@ -1030,7 +1030,7 @@ var _DoBlockQuotes = function(text) {
 					return pre;
 				});
 			
-			return hashBlock(make_tag("<blockquote>\n", bq)+ bq + "\n</blockquote>");
+			return hashBlock(make_tag("<div>", bq) + "<blockquote>\n" + bq + "\n</blockquote>" + "</div>");
 		});
 	return text;
 }
