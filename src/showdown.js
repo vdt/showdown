@@ -1061,8 +1061,21 @@ var _FormParagraphs = function(text) {
 			grafsOut.push(str);
 		}
 		else if (str.search(/\S/) >= 0) {
+            var p_tag = "<p>";
+            var rtl_p_tag = "<p style='direction:rtl; text-align: right'>";
+             
+            // Check for RTL paragraphs: paragraphs that start with a character
+            // from an RTL script.
+            // RTL scripts are: Arabic, Hebrew, Syriac, Thaana
+            // Unicode ranges reference: http://www.ssec.wisc.edu/~tomw/java/unicode.html
+            var first_char = str.charCodeAt(str.search(/\S/)); //first non-white-space char
+            if(first_char >= 1424 && first_char <= 1983) 
+            {
+                p_tag = rtl_p_tag;
+            }
+
 			str = _RunSpanGamut(str);
-			str = str.replace(/^([ \t]*)/g,"<p>");
+			str = str.replace(/^([ \t]*)/g, p_tag);
 			str += "</p>"
 			grafsOut.push(str);
 		}
