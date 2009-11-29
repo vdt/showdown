@@ -661,10 +661,10 @@ var _DoHeaders = function(text) {
 	//	--------
 	//
 	text = text.replace(/^(.+)[ \t]*\n=+[ \t]*\n+/gm,
-		function(wholeMatch,m1){return hashBlock("<h1>" + _RunSpanGamut(m1) + "</h1>");});
+		function(wholeMatch,m1){return hashBlock(make_tag("<h1>", m1)+ _RunSpanGamut(m1) + "</h1>");});
 
 	text = text.replace(/^(.+)[ \t]*\n-+[ \t]*\n+/gm,
-		function(matchFound,m1){return hashBlock("<h2>" + _RunSpanGamut(m1) + "</h2>");});
+		function(matchFound,m1){return hashBlock(make_tag("<h2>", m1)+ _RunSpanGamut(m1) + "</h2>");});
 
 	// atx-style headers:
 	//  # Header 1
@@ -688,7 +688,7 @@ var _DoHeaders = function(text) {
 	text = text.replace(/^(\#{1,6})[ \t]*(.+?)[ \t]*\#*\n+/gm,
 		function(wholeMatch,m1,m2) {
 			var h_level = m1.length;
-			return hashBlock("<h" + h_level + ">" + _RunSpanGamut(m2) + "</h" + h_level + ">");
+			return hashBlock(make_tag("<h" + h_level + ">", m2) + _RunSpanGamut(m2) + "</h" + h_level + ">");
 		});
 
 	return text;
@@ -734,7 +734,7 @@ var _DoLists = function(text) {
 	if (g_list_level) {
 		text = text.replace(whole_list,function(wholeMatch,m1,m2) {
 			var list = m1;
-			var list_type = (m2.search(/[*+-]/g)>-1) ? "ul" : "ol";
+			var list_type = (m2.search(/[*+-]/g)>-1) ? make_tag("ul", m1) : make_tag("ol", m1);
 
 			// Turn double returns into triple returns, so that we can make a
 			// paragraph for the last item in a list, if necessary:
@@ -1030,7 +1030,7 @@ var _DoBlockQuotes = function(text) {
 					return pre;
 				});
 			
-			return hashBlock("<blockquote>\n" + bq + "\n</blockquote>");
+			return hashBlock(make_tag("<blockquote>\n", bq)+ bq + "\n</blockquote>");
 		});
 	return text;
 }
@@ -1061,22 +1061,9 @@ var _FormParagraphs = function(text) {
 			grafsOut.push(str);
 		}
 		else if (str.search(/\S/) >= 0) {
-            var p_tag = "<p>";
-            var rtl_p_tag = "<p style='direction:rtl; text-align: right'>";
-             
-            // Check for RTL paragraphs: paragraphs that start with a character
-            // from an RTL script.
-            // RTL scripts are: Arabic, Hebrew, Syriac, Thaana
-            // Unicode ranges reference: http://www.ssec.wisc.edu/~tomw/java/unicode.html
-            var first_char = str.charCodeAt(str.search(/\S/)); //first non-white-space char
-            if(first_char >= 1424 && first_char <= 1983) 
-            {
-                p_tag = rtl_p_tag;
-            }
-
 			str = _RunSpanGamut(str);
-			str = str.replace(/^([ \t]*)/g, p_tag);
-			str += "</p>"
+			str = str.replace(/^([ \t]*)/g, make_tag("<p>", str));
+			str += "</p>";
 			grafsOut.push(str);
 		}
 
@@ -1162,6 +1149,45 @@ var _DoAutoLinks = function(text) {
 	return text;
 }
 
+/**
+    This functions decides whether to add RTL attributes to the tag or not
+    based on the content of the text that it's intended to wrap
+
+    @param tag: the tag text, e.g. "<p>", or "<blockquote>\n"
+    @param text: the text that will be wrapped by the tag
+    @return: modified tag with RTL attributes if needed
+ */
+var make_tag = function(tag, text) {
+    // Check for RTL paragraphs: paragraphs that start with a character
+    // from an RTL script.
+    // RTL scripts are: Arabic, Hebrew, Syriac, Thaana
+    // Unicode ranges reference: http://www.ssec.wisc.edu/~tomw/java/unicode.html
+
+    // Location of first character in block
+    var index = 0;
+
+    /*
+    // Skip the tag
+    var tag_match = text.match(/<\w+>/);
+    if(tag_match)
+    {
+        index = tag_match[0].length;
+        console.log("index jumped to " + text.substring(index, index+4));
+
+    }
+    */
+    
+    // get first non-whitespace non-marker character
+    index += text.search(/[^ \t*\-#>]/);
+    console.log("  -- checking:" + text.substring(index, index+10));
+    var first_char = text.charCodeAt(index); 
+    if(first_char >= 1424 && first_char <= 1983) 
+    {
+        // text = "<div style='direction:rtl; text-align: right'>" + text + "</div>";
+        tag = tag.replace(/>/, " style='direction:rtl; text-align: right'>");
+    }
+    return tag;
+}
 
 var _EncodeEmailAddress = function(addr) {
 //
