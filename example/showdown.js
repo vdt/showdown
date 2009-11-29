@@ -734,7 +734,7 @@ var _DoLists = function(text) {
 	if (g_list_level) {
 		text = text.replace(whole_list,function(wholeMatch,m1,m2) {
 			var list = m1;
-			var list_type = (m2.search(/[*+-]/g)>-1) ? make_tag("ul", m1) : make_tag("ol", m1);
+			var list_type = (m2.search(/[*+-]/g)>-1) ? "ul" : "ol";
 
 			// Turn double returns into triple returns, so that we can make a
 			// paragraph for the last item in a list, if necessary:
@@ -746,7 +746,7 @@ var _DoLists = function(text) {
 			// HTML block parser. This is a hack to work around the terrible
 			// hack that is the HTML block parser.
 			result = result.replace(/\s+$/,"");
-			result = "<"+list_type+">" + result + "</"+list_type+">\n";
+			result = make_tag("<"+list_type+">", result) + result + "</"+list_type+">\n";
 			return result;
 		});
 	} else {
@@ -756,11 +756,11 @@ var _DoLists = function(text) {
 			var list = m2;
 
 			var list_type = (m3.search(/[*+-]/g)>-1) ? "ul" : "ol";
-			// Turn double returns into triple returns, so that we can make a
+            // Turn double returns into triple returns, so that we can make a
 			// paragraph for the last item in a list, if necessary:
 			var list = list.replace(/\n{2,}/g,"\n\n\n");;
 			var result = _ProcessListItems(list);
-			result = runup + "<"+list_type+">\n" + result + "</"+list_type+">\n";	
+			result = runup + make_tag("<"+list_type+">\n", result) + result + "</"+list_type+">\n";	
 			return result;
 		});
 	}
@@ -1166,16 +1166,16 @@ var make_tag = function(tag, text) {
     // Location of first character in block
     var index = 0;
 
-    /*
+    //*
     // Skip the tag
-    var tag_match = text.match(/<\w+>/);
+    var tag_match = text.match(/<[^<>]+>/);
     if(tag_match)
     {
         index = tag_match[0].length;
         console.log("index jumped to " + text.substring(index, index+4));
 
     }
-    */
+    //*/
     
     // get first non-whitespace non-marker character
     index += text.search(/[^ \t*\-#>]/);
